@@ -58,6 +58,7 @@ def recover_password(email: str, session: SessionDep) -> Message:
     """
     user = crud.get_user_by_email(session=session, email=email)
 
+    # TODO: emailが存在するかどうかをユーザーに知らせるべきではないのでは。
     if not user:
         raise HTTPException(
             status_code=404,
@@ -89,10 +90,12 @@ def reset_password(session: SessionDep, body: NewPassword) -> Message:
             status_code=404,
             detail="The user with this email does not exist in the system.",
         )
+    # TODO: emailが存在するかどうかをユーザーに知らせるべきではないのでは。
     elif not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     hashed_password = get_password_hash(password=body.new_password)
     user.hashed_password = hashed_password
+    # TODO: updateじゃなくてaddなのはなぜ？
     session.add(user)
     session.commit()
     return Message(message="Password updated successfully")
